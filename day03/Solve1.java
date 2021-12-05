@@ -56,10 +56,10 @@ public class Solve1 {
 
         long getGammaTimesEpsilon() {
             long gamma = getGamma();
-            System.out.printf("%64s -> %d%n", Long.toBinaryString(gamma), gamma);
+            System.out.printf("gamma: %12s -> %d%n", Long.toBinaryString(gamma), gamma);
             BitSet epsilon = BitSet.valueOf(new long[] { ~gamma });
             epsilon.clear(counts.length, Long.SIZE);
-            System.out.printf("%64s -> %d%n", Long.toBinaryString(epsilon.toLongArray()[0]), epsilon.toLongArray()[0]);
+            System.out.printf("epsilon: %12s -> %d%n", Long.toBinaryString(epsilon.toLongArray()[0]), epsilon.toLongArray()[0]);
             return gamma * epsilon.toLongArray()[0];
         }
     }
