@@ -4,35 +4,51 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class IO {
 
+    public static Path TOP_DIR = Path.of(".");
+
     public static Stream<String> getInput() {
-        return getInput(getCallerPath(2));
+        Class<?> cc = getCallerClass(2);
+        return getInput(parseInt(cc.getPackageName()));
     }
 
-    public static Stream<String> getInput(String path) {
+    public static Stream<String> getInput(int day) {
         try {
-            return Files.lines(Path.of(path + "/input.txt"));
+            return Files.lines(TOP_DIR.resolve("day%02d/input.txt".formatted(day)));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    static void writeResult(int taskNumber, String result) {
+    public static void writeResult(String result) {
+        Class<?> cc = getCallerClass(3);
+        writeResult(parseInt(cc.getPackageName()), parseInt(cc.getSimpleName()), result);
+    }
+
+    static void writeResult(int day, int task, String result) {
         try {
-            Files.writeString(Path.of(getCallerPath(3) + "/output" + taskNumber + ".txt"), result);
+            Files.writeString(TOP_DIR.resolve("day%02d/output%d.txt".formatted(day, task)), result);
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private static String getCallerPath(int frame) {
+    static Pattern DIGITS = Pattern.compile("[0-9]+");
+
+    private static int parseInt(String name) {
+        return Integer.parseInt(
+                DIGITS.matcher(name).results()
+                        .findFirst().orElseThrow().group());
+    }
+
+    private static Class<?> getCallerClass(int nFrames) {
         return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
-                .walk(frames -> frames.skip(frame)
-                        .findFirst()).get().getDeclaringClass().getPackageName().replace(".", "/");
+                .walk(frames -> frames.skip(nFrames).findFirst()).get().getDeclaringClass();
     }
 }

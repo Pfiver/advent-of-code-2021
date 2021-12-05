@@ -7,11 +7,11 @@ import static common.IO.getInput;
 import static common.Run.attempt;
 import static java.lang.Boolean.TRUE;
 
-class Solve1 {
+public class Solve1 {
 
     public static void main(String[] args) throws Exception {
 
-        attempt(1,
+        attempt(
                 Solve1::method1,
                 Solve1::method2,
                 Solve1::method3,

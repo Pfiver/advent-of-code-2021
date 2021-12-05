@@ -5,11 +5,11 @@ import day02.Solve1.Command;
 import static common.IO.getInput;
 import static common.Run.attempt;
 
-class Solve2 {
+public class Solve2 {
 
     public static void main(String[] args) throws Exception {
 
-        attempt(2,
+        attempt(
                 Solve2::method1
         );
     }

@@ -3,11 +3,11 @@ package day02;
 import static common.IO.getInput;
 import static common.Run.attempt;
 
-class Solve1 {
+public class Solve1 {
 
     public static void main(String[] args) throws Exception {
 
-        attempt(1,
+        attempt(
                 Solve1::method1
         );
     }

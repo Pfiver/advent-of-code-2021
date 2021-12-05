@@ -1,0 +1,70 @@
+#!/usr/bin/env java --source 17
+
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
+
+public class runit {
+
+    static File TOP_DIR = new File(URI.create(runit.class.getProtectionDomain().getCodeSource().getLocation().toString()).resolve("."));
+    static File TARGET_DIR = new File(TOP_DIR, "target/classes");
+
+    static Stream<File> findSources(File directory) {
+        return Arrays.stream(Objects.requireNonNull(directory.list()))
+                .map(entry -> new File(directory, entry))
+                .flatMap(entry -> {
+                    if (entry.isDirectory()) {
+                        return findSources(entry);
+                    }
+                    else if (entry.getName().endsWith(".java")) {
+                        return Stream.of(entry);
+                    }
+                    return Stream.empty();
+                });
+    }
+
+    public static void main(String... args) throws Exception {
+
+        File[] changedSources = Stream.of(Objects.requireNonNull(TOP_DIR.list()))
+                .filter(n -> n.matches("common|day.."))
+                .map(n -> new File(TOP_DIR, n))
+                .flatMap(runit::findSources)
+                .filter(runit::hasChanges)
+                .toArray(File[]::new);
+
+        if (changedSources.length > 0) {
+            System.out.println("compiling " + asList(changedSources));
+            JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
+            StandardJavaFileManager fm = javac.getStandardFileManager(null, null, UTF_8);
+            List<String> arguments = asList("-d", TARGET_DIR.getPath(), "-cp", TOP_DIR.getPath());
+            Iterable<? extends JavaFileObject> cus = fm.getJavaFileObjects(changedSources);
+            if (!javac.getTask(null, fm, null, arguments, null, cus).call()) {
+                throw new Exception("error compiling sources");
+            }
+        }
+
+        URLClassLoader cl = new URLClassLoader(new URL[]{TARGET_DIR.toURI().toURL()});
+        cl.loadClass("common.IO").getDeclaredField("TOP_DIR").set(null, Path.of(TOP_DIR.toURI()));
+        cl.loadClass("common.Run").getDeclaredMethod("main", String[].class).invoke(null, (Object) args);
+    }
+
+    private static boolean hasChanges(File sourceFile) {
+        String relPath = sourceFile.getPath().substring(TOP_DIR.getPath().length() + 1);
+        File classFile = new File(TARGET_DIR, relPath.replaceAll("\\.java$", ".class"));
+//        System.out.printf("%s: %s%n", sourceFile, sourceFile.lastModified() > classFile.lastModified());
+        return !classFile.exists() || sourceFile.lastModified() > classFile.lastModified();
+    }
+}
