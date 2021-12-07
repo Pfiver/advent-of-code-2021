@@ -13,12 +13,12 @@ public class IO {
 
     public static Stream<String> getInput() {
         Class<?> cc = getCallerClass(2);
-        return getInput(parseInt(cc.getPackageName()));
+        return getInput(cc.getPackageName() + "/input.txt");
     }
 
-    public static Stream<String> getInput(int day) {
+    public static Stream<String> getInput(String path) {
         try {
-            return Files.lines(TOP_DIR.resolve("day%02d/input.txt".formatted(day)));
+            return Files.lines(TOP_DIR.resolve(path));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
