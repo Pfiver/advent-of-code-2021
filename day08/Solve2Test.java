@@ -41,18 +41,18 @@ public class Solve2Test {
 
     public static void main(String[] args) {
 
-        System.out.println("sensible 'numbers':" + 10);
-        System.out.println("possible 'numbers':" + Math.pow(2, 7));
-        System.out.println("possible configurations: " + factorial(7));
+//        System.out.println("sensible 'numbers':" + 10);
+//        System.out.println("possible 'numbers':" + Math.pow(2, 7));
+//        System.out.println("possible configurations: " + factorial(7));
 
-//        test1();
+        test1();
 //        System.out.println("test 1 passed\n\n");
 
-//        test2();
+        test2();
 //        System.out.println("test 2 passed\n\n");
 
         test3();
-        System.out.println("test 3 passed\n\n");
+//        System.out.println("test 3 passed\n\n");
     }
 
     private static long factorial(int num) {
@@ -70,8 +70,8 @@ public class Solve2Test {
 
         display.wiring = w;
 
-        Arrays.stream(display.digits).forEach(Solve2.Display.SevenSeg::show);
-        Arrays.stream(display.digits).map(Solve2.Display.SevenSeg::display).forEach(v -> System.out.println("v: " + v));
+//        Arrays.stream(display.digits).forEach(Solve2.Display.SevenSeg::show);
+//        Arrays.stream(display.digits).map(Solve2.Display.SevenSeg::display).forEach(v -> System.out.println("v: " + v));
 
         if (display.display() != 5353) {
             throw new AssertionError("fail");
@@ -81,11 +81,11 @@ public class Solve2Test {
     private static void test2() {
         var actual = getInput("day08/test-input.txt")
                 .map(Solve2.Record::new)
-                .peek(r -> r.output.digits[0].show())
-                .peek(r -> r.output.digits[1].show())
-                .peek(r -> r.output.digits[2].show())
-                .peek(r -> r.output.digits[3].show())
-                .peek(r -> System.out.println(" => " + r.output.display()))
+//                .peek(r -> r.output.digits[0].show())
+//                .peek(r -> r.output.digits[1].show())
+//                .peek(r -> r.output.digits[2].show())
+//                .peek(r -> r.output.digits[3].show())
+//                .peek(r -> System.out.println(" => " + r.output.display()))
                 .mapToInt(r -> r.output.display()).sum();
 
         if (actual != 61229) {
@@ -95,10 +95,10 @@ public class Solve2Test {
 
     private static void test3() {
         var r = new Solve2.Record("fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg");
-        r.output.digits[0].show();
-        r.output.digits[1].show();
-        r.output.digits[2].show();
-        r.output.digits[3].show();
+//        r.output.digits[0].show();
+//        r.output.digits[1].show();
+//        r.output.digits[2].show();
+//        r.output.digits[3].show();
         var actual = r.output.display();
 
         if (actual != 1197) {

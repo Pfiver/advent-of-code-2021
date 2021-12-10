@@ -30,7 +30,6 @@ public class Run {
 
     private static void loadAndRunMain(String className) {
         try {
-            System.out.println("> " + className);
             Class.forName(className).getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[0]);
         }
         catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -40,21 +39,23 @@ public class Run {
 
     public static void attempt(LongSupplier... longSuppliers) {
 
+        System.out.printf("%14s ***", Common.getCallerClass(2).getName());
+
         long start = System.currentTimeMillis();
 
         List<Long> results = Stream.of(longSuppliers)
 //                .peek(s -> System.out.printf("%s: ", s)) // TODO: https://twitter.com/Pfiver/status/1370123672434921474
                 .map(LongSupplier::getAsLong)
-                .peek(System.out::println)
+//                .peek(System.out::println)
                 .distinct()
                 .toList();
-
-        System.out.printf("computed in %d milliseconds%n", System.currentTimeMillis() - start);
 
         if (results.size() != 1) {
             throw new IllegalStateException("fail");
         }
 
-        IO.writeResult(results.get(0).toString());
+        IO.writeResult(results.get(0));
+        System.out.printf("\u0008\u0008\u0008: %16d "
+                + " (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
     }
 }

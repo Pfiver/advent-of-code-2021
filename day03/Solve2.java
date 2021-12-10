@@ -32,10 +32,10 @@ public class Solve2 {
                 .toList();
 
         long oxy = reduce(numbers, 0, true, true);
-        System.out.println("oxy: " + oxy);
+//        System.out.println("oxy: " + oxy);
 
         long co2 = reduce(numbers, 0, false, false);
-        System.out.println("co2: " + co2);
+//        System.out.println("co2: " + co2);
 
         return oxy * co2;
     }

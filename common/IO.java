@@ -12,7 +12,7 @@ public class IO {
     public static Path TOP_DIR = Path.of(".");
 
     public static Stream<String> getInput() {
-        Class<?> cc = getCallerClass(2);
+        Class<?> cc = Common.getCallerClass(2);
         return getInput(cc.getPackageName() + "/input.txt");
     }
 
@@ -25,14 +25,14 @@ public class IO {
         }
     }
 
-    public static void writeResult(String result) {
-        Class<?> cc = getCallerClass(3);
+    public static void writeResult(long result) {
+        Class<?> cc = Common.getCallerClass(3);
         writeResult(parseInt(cc.getPackageName()), parseInt(cc.getSimpleName()), result);
     }
 
-    static void writeResult(int day, int task, String result) {
+    static void writeResult(int day, int task, long result) {
         try {
-            Files.writeString(TOP_DIR.resolve("day%02d/output%d.txt".formatted(day, task)), result);
+            Files.writeString(TOP_DIR.resolve("day%02d/output%d.txt".formatted(day, task)), Long.toString(result));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -47,8 +47,4 @@ public class IO {
                         .findFirst().orElseThrow().group());
     }
 
-    private static Class<?> getCallerClass(int nFrames) {
-        return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
-                .walk(frames -> frames.skip(nFrames).findFirst()).get().getDeclaringClass();
-    }
 }

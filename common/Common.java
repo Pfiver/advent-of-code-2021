@@ -9,4 +9,9 @@ public class Common {
             throw new UnsupportedOperationException();
         };
     }
+
+    static Class<?> getCallerClass(int nFrames) {
+        return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+                .walk(frames -> frames.skip(nFrames).findFirst()).get().getDeclaringClass();
+    }
 }
