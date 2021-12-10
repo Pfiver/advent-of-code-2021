@@ -16,12 +16,14 @@ public class Run {
     public static void main(String[] args) throws Exception {
         Arrays.stream(Objects.requireNonNull(TOP_DIR.list()))
                 .filter(n -> n.matches("day.."))
+                .sorted()
                 .map(n -> new File(TOP_DIR, n))
                 .flatMap(d -> Arrays.stream(Objects.requireNonNull(d.list()))
                         .map(n -> new File(d, n)))
                 .map(File::getPath)
                 .map(p -> p.substring(TOP_DIR.getPath().length() + 1).replaceAll("\\.class$", ""))
                 .filter(p -> p.matches(".*/Solve[^$]*"))
+                .sorted()
                 .map(p -> p.replaceAll("/", "."))
                 .forEach(Run::loadAndRunMain);
     }
@@ -38,12 +40,16 @@ public class Run {
 
     public static void attempt(LongSupplier... longSuppliers) {
 
+        long start = System.currentTimeMillis();
+
         List<Long> results = Stream.of(longSuppliers)
 //                .peek(s -> System.out.printf("%s: ", s)) // TODO: https://twitter.com/Pfiver/status/1370123672434921474
                 .map(LongSupplier::getAsLong)
                 .peek(System.out::println)
                 .distinct()
                 .toList();
+
+        System.out.printf("computed in %d milliseconds%n", System.currentTimeMillis() - start);
 
         if (results.size() != 1) {
             throw new IllegalStateException("fail");
