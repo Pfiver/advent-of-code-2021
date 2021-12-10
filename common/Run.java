@@ -14,6 +14,7 @@ public class Run {
     static File TOP_DIR = new File(URI.create(Run.class.getProtectionDomain().getCodeSource().getLocation().toString()));
 
     public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
         Arrays.stream(Objects.requireNonNull(TOP_DIR.list()))
                 .filter(n -> n.matches("day.."))
                 .sorted()
@@ -22,10 +23,12 @@ public class Run {
                         .map(n -> new File(d, n)))
                 .map(File::getPath)
                 .map(p -> p.substring(TOP_DIR.getPath().length() + 1).replaceAll("\\.class$", ""))
-                .filter(p -> p.matches(".*/Solve[^$]*"))
+                .filter(p -> p.matches(".*/Solve\\d*"))
                 .sorted()
                 .map(p -> p.replaceAll("/", "."))
                 .forEach(Run::loadAndRunMain);
+
+        System.out.printf("%nTotal running time: %d milliseconds%n", System.currentTimeMillis() - start);
     }
 
     private static void loadAndRunMain(String className) {
