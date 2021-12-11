@@ -1,14 +1,16 @@
 package day09;
 
 import common.Run;
+import common.Transform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static common.IO.getInput;
 
 public class Solve2 {
 
@@ -18,7 +20,7 @@ public class Solve2 {
 
     static long solve() {
 
-        byte[][] heights = Solve1.getHeights();
+        byte[][] heights = Transform.decimalDigitsToPaddedValuesRectangle(getInput(), 100, Byte.MAX_VALUE);
 
         return new Scene(heights).getLowPoints()
 //                .parallel() // buuuuh --- no gain :-( / running time of ~50ms probably too low to produce an obvious effect ...

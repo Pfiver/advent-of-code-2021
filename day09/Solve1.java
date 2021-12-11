@@ -1,9 +1,7 @@
 package day09;
 
 import common.Run;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
+import common.Transform;
 
 import static common.IO.getInput;
 
@@ -15,7 +13,7 @@ public class Solve1 {
 
     static long solve() {
 
-        byte[][] heights = getHeights();
+        byte[][] heights = Transform.decimalDigitsToPaddedValuesRectangle(getInput(), 100, Byte.MAX_VALUE);
 
         var scene = new Scene(heights);
 
@@ -26,23 +24,6 @@ public class Solve1 {
             }
         }
         return sum;
-    }
-
-    static byte[][] getHeights() {
-        byte[] highs = new byte[102];
-        Arrays.fill(highs, Byte.MAX_VALUE);
-        var heights = Stream.concat(Stream.concat(Stream.of(highs), getInput()
-                .map(line -> {
-                    var i = 1;
-                    var h = new byte[102];
-                    h[0] = h[101] = Byte.MAX_VALUE;
-                    for (char c : line.toCharArray()) {
-                        h[i++] = (byte) Character.getNumericValue(c);
-                    }
-                    return h;
-                })), Stream.of(highs))
-                .toArray(byte[][]::new);
-        return heights;
     }
 
     record Scene(byte[][] heights) {
