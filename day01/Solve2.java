@@ -1,18 +1,11 @@
 package day01;
 
 import static common.IO.getInput;
-import static common.Run.attempt;
 
 public class Solve2 {
 
-    public static void main(String[] args) {
+    public static long solve() {
 
-        attempt(
-                Solve2::method1
-        );
-    }
-
-    static long method1() {
         return Window.apply(
                         Window.apply(getInput()
                                         .map(Long::parseLong),

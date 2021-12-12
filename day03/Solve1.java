@@ -3,18 +3,10 @@ package day03;
 import java.util.BitSet;
 
 import static common.IO.getInput;
-import static common.Run.attempt;
 
 public class Solve1 {
 
-    public static void main(String[] args) throws Exception {
-
-        attempt(
-                Solve1::method1
-        );
-    }
-
-    static long method1() {
+    public static long solve() {
 
         return getInput()
                 .reduce(new BitCounts(), BitCounts::add, (l, r) -> {

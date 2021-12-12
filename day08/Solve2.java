@@ -1,7 +1,5 @@
 package day08;
 
-import common.Run;
-
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.stream.IntStream;
@@ -12,11 +10,7 @@ import static java.lang.Integer.bitCount;
 
 public class Solve2 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve2::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
 
         return getInput()
                 .map(Record::new)

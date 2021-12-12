@@ -1,18 +1,10 @@
 package day02;
 
 import static common.IO.getInput;
-import static common.Run.attempt;
 
 public class Solve1 {
 
-    public static void main(String[] args) throws Exception {
-
-        attempt(
-                Solve1::method1
-        );
-    }
-
-    static long method1() {
+    public static long solve() {
 
         Position p = getInput()
                 .map(Command::new)
@@ -24,9 +16,11 @@ public class Solve1 {
     }
 
     static class Command {
-        enum Direction { FORWARD, DOWN, UP }
+        enum Direction {FORWARD, DOWN, UP}
+
         Direction direction;
         int value;
+
         Command(String line) {
             String[] cv = line.split(" ");
             direction = switch (cv[0]) {
@@ -41,6 +35,7 @@ public class Solve1 {
 
     static class Position {
         long x, depth;
+
         public Position advance(Command command) {
             switch (command.direction) {
                 case FORWARD -> x += command.value;

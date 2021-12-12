@@ -1,16 +1,11 @@
 package day10;
 
 import common.IO;
-import common.Run;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 public class Solve2 {
-
-    public static void main(String[] args) {
-        Run.attempt(Solve2::solve);
-    }
 
     enum Chunk {
         PAREN("()", 1), BRACKET("[]", 2), BRACE("{}", 3), ANGLE("<>", 4);
@@ -25,7 +20,7 @@ public class Solve2 {
         }
     }
 
-    static long solve() {
+    public static long solve() {
         return solve(IO.getInput());
     }
 

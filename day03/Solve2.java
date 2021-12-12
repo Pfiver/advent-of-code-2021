@@ -4,20 +4,12 @@ import java.util.BitSet;
 import java.util.List;
 
 import static common.IO.getInput;
-import static common.Run.attempt;
 
 public class Solve2 {
 
     public static final int NBITS = 12;
 
-    public static void main(String[] args) throws Exception {
-
-        attempt(
-                Solve2::method1
-        );
-    }
-
-    static long method1() {
+    public static long solve() {
 
         List<BitSet> numbers = getInput()
                 .map(s -> {

@@ -1,7 +1,5 @@
 package day04;
 
-import common.Run;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -11,11 +9,7 @@ import static common.IO.getInput;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
 
         Iterator<String> lines = getInput().iterator();
         int[] numbers = getNumbers(lines.next());

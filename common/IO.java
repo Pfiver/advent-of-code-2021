@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.function.LongSupplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -25,9 +27,8 @@ public class IO {
         }
     }
 
-    public static void writeResult(long result) {
-        Class<?> cc = Common.getCallerClass(3);
-        writeResult(parseInt(cc.getPackageName()), parseInt(cc.getSimpleName()), result);
+    public static void writeResult(Class<?> clazz, long result) {
+        writeResult(parseInt(clazz.getPackageName()), parseInt(clazz.getSimpleName()), result);
     }
 
     static void writeResult(int day, int task, long result) {

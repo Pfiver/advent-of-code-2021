@@ -1,27 +1,17 @@
 package day05;
 
 import common.Common;
-import common.Run;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static common.IO.getInput;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
-
+    public static long solve() {
         var cover = getInput().reduce(new Cover(), Cover::record, Common.throwingBinOp());
-
         return cover.counts.values().stream().filter(n -> n > 1).count();
     }
 

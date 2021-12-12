@@ -1,17 +1,12 @@
 package day09;
 
-import common.Run;
 import common.Transform;
 
 import static common.IO.getInput;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
 
         byte[][] heights = Transform.decimalDigitsToPaddedValuesRectangle(getInput(), 100, Byte.MAX_VALUE);
 

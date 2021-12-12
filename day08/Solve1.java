@@ -1,7 +1,5 @@
 package day08;
 
-import common.Run;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.IntStream;
@@ -11,11 +9,7 @@ import static java.util.Arrays.asList;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
 
         Collection<Integer> segmentCountsOfUniqueSegmentCountDigits = asList(
                 2 // 1

@@ -1,7 +1,6 @@
 package common;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -9,11 +8,16 @@ import java.util.Objects;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
+import static common.Common.CheckedSupplier.tryCatch;
+import static common.Common.CheckedSupplier.tryGet;
+
 public class Run {
 
     static File TOP_DIR = new File(URI.create(Run.class.getProtectionDomain().getCodeSource().getLocation().toString()));
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+
+        System.out.println();
         long start = System.currentTimeMillis();
         Arrays.stream(Objects.requireNonNull(TOP_DIR.list()))
                 .filter(n -> n.matches("day.."))
@@ -25,40 +29,43 @@ public class Run {
                 .map(p -> p.substring(TOP_DIR.getPath().length() + 1).replaceAll("\\.class$", ""))
                 .filter(p -> p.matches(".*/Solve\\d*"))
                 .sorted()
-                .map(p -> p.replaceAll("/", "."))
-                .forEach(Run::loadAndRunMain);
-
+//                .limit(2)
+                .map(p -> p.replace("/", "."))
+                .filter(c -> args.length == 0 || c.equals(args[0]))
+                .map(className -> tryGet(() -> Class.forName(className)))
+                .forEach(clazz -> tryCatch(
+                        () -> clazz.getDeclaredMethod("solve"),
+                        solve -> run(clazz, (Common.CheckedLongSupplier) () -> (long) solve.invoke(null)),
+                        () -> clazz.getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[0])));
         System.out.printf("%nTotal running time: %d milliseconds%n", System.currentTimeMillis() - start);
     }
 
-    private static void loadAndRunMain(String className) {
-        try {
-            Class.forName(className).getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[0]);
-        }
-        catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+    public static void run(LongSupplier... longSuppliers) {
+        run(Common.getCallerClass(2), longSuppliers);
     }
 
-    public static void attempt(LongSupplier... longSuppliers) {
+    private static void run(Class<?> clazz, LongSupplier... longSuppliers) {
 
-        System.out.printf("%14s ***", Common.getCallerClass(2).getName());
+        System.out.printf("%s***", clazz.getName());
 
         long start = System.currentTimeMillis();
 
         List<Long> results = Stream.of(longSuppliers)
-//                .peek(s -> System.out.printf("%s: ", s)) // TODO: https://twitter.com/Pfiver/status/1370123672434921474
+                .limit(1)
+//                .peek(s -> System.out.printf("\u0008\u0008\u0008%n    %s: ***", getMethod(s)))
                 .map(LongSupplier::getAsLong)
-//                .peek(System.out::println)
+//                .peek(x -> System.out.printf("\u0008\u0008\u0008%s ***", x))
                 .distinct()
                 .toList();
 
+
         if (results.size() != 1) {
-            throw new IllegalStateException("fail");
+            throw new IllegalStateException("two or more different methods produce different results in " + clazz);
         }
 
-        IO.writeResult(results.get(0));
-        System.out.printf("\u0008\u0008\u0008: %16d "
-                + " (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
+        IO.writeResult(clazz, results.get(0));
+
+//        System.out.printf("\u0008\u0008\u0008%n    (computed in %3d milliseconds)%n%n", System.currentTimeMillis() - start);
+        System.out.printf("\u0008\u0008\u0008: %16d (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
     }
 }

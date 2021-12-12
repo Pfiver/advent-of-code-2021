@@ -1,18 +1,12 @@
 package day07;
 
-import common.Run;
-
 import java.util.Arrays;
 
 import static common.IO.getInput;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
 
         String[] input = getInput()
                 .findFirst().orElseThrow().split(",");
@@ -28,7 +22,7 @@ public class Solve1 {
         int zeroSubIndex = 0;
         long subCount = subs.length;
 
-        // TODO: optimize by derivating fuel[n] from fuel[n-1] ...
+        // NOTICE: could be optimized by derivating fuel[n] from fuel[n-1] ...
 //        for (int sub : subs) {
 //            fuel[0] += sub - minPos;
 //        }

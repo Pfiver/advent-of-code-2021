@@ -3,18 +3,10 @@ package day02;
 import day02.Solve1.Command;
 
 import static common.IO.getInput;
-import static common.Run.attempt;
 
 public class Solve2 {
 
-    public static void main(String[] args) throws Exception {
-
-        attempt(
-                Solve2::method1
-        );
-    }
-
-    static long method1() {
+    public static long solve() {
 
         Position p = getInput()
                 .map(Command::new)

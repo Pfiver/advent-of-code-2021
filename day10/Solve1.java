@@ -1,17 +1,12 @@
 package day10;
 
 import common.IO;
-import common.Run;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Stack;
 
 public class Solve1 {
-
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
 
     enum Chunk {
         PAREN("()", 3), BRACKET("[]", 57), BRACE("{}", 1197), ANGLE("<>", 25137);
@@ -26,7 +21,7 @@ public class Solve1 {
         }
     }
 
-    static long solve() {
+    public static long solve() {
         return IO.getInput().mapToInt(line -> {
             Stack<Chunk> stack = new Stack<>();
             return line.chars().map(c -> {

@@ -35,9 +35,13 @@ public class Solve1Test {
         assertLevels(Solve1TestRef.BEFORE_ANY_STEPS, solver);
 
         cnt += solver.step();
+        solver.resetPadding();
+        solver.resetFlashers();
         assertLevels(Solve1TestRef.AFTER_STEP_1, solver);
 
         cnt += solver.step();
+        solver.resetPadding();
+        solver.resetFlashers();
         assertLevels(Solve1TestRef.AFTER_STEP_2, solver);
 
         cnt += LongStream.generate(solver::step)

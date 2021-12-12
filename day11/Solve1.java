@@ -1,6 +1,5 @@
 package day11;
 
-import common.Run;
 import common.Transform;
 
 import java.util.stream.LongStream;
@@ -9,11 +8,7 @@ import static common.IO.getInput;
 
 public class Solve1 {
 
-    public static void main(String[] args) {
-        Run.attempt(Solve1::solve);
-    }
-
-    static long solve() {
+    public static long solve() {
         var levels2d = Transform.decimalDigitsToPaddedValuesRectangle(getInput(), 10, (byte) 0);
         var solver = new Solver(10, 10, levels2d);
         return LongStream.generate(solver::step)
@@ -58,7 +53,7 @@ public class Solve1 {
             }
         }
 
-        private void resetFlashers() {
+        void resetFlashers() {
             for (int i = 0, n = levels.length; i < n; i++) {
                 if (levels[i] < 0) {
                     levels[i] = 0;
@@ -66,7 +61,7 @@ public class Solve1 {
             }
         }
 
-        private void resetPadding() {
+        void resetPadding() {
             int maxX = width -1, maxY = height - 1;
             for (int x =    0; x < maxX; x++) levels[x]                = 0; // bottom
             for (int y =    0; y < maxY; y++) levels[maxX + y * width] = 0; // right
