@@ -1,8 +1,8 @@
 package day11;
 
+import common.Test;
 import common.Transform;
 
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -48,17 +48,12 @@ public class Solve1Test {
                 .limit(98)
                 .sum();
 
-        assertEquals(FLASHES_AFTER_100, cnt);
+        Test.assertEquals(FLASHES_AFTER_100, cnt);
     }
 
     private static void assertLevels(String expected, Solve1.Solver solver) {
-        assertEquals(toString(flatten(Transform.decimalDigitsToPaddedValuesRectangle(expected.lines(), 10, (byte) 0))), toString(solver.levels()));
-    }
-
-    private static void assertEquals(Object expected, Object actual) {
-        if (!Objects.equals(expected, actual)) {
-            throw new AssertionError("expected\n" + expected + "\n but actual is\n" + actual);
-        }
+        var expectedLevels = flatten(Transform.decimalDigitsToPaddedValuesRectangle(expected.lines(), 10, (byte) 0));
+        Test.assertEquals(toString(expectedLevels), toString(solver.levels()));
     }
 
     static void print(Solve1.Solver solver) {

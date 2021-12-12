@@ -20,8 +20,10 @@ public class Common {
             catch (Exception e) {throw new RuntimeException(e);}
         }
         static <T> void tryCatch(CheckedSupplier<T> s, CheckedConsumer<T> pass, CheckedRunnable fail) {
-            try { pass.tryAccept(s.tryGet()); }
-            catch (Exception e) { CheckedRunnable.tryRun(fail); }
+            T v;
+            try { v = s.tryGet(); }
+            catch (Exception e) { CheckedRunnable.tryRun(fail); return; }
+            pass.tryAccept(v);
         }
     }
 
@@ -34,13 +36,15 @@ public class Common {
     }
 
     interface CheckedConsumer<T> {
-        void tryAccept(T v) throws Exception;
+        void accept(T v) throws Exception;
+        default void tryAccept(T v) {
+            try { accept(v); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
     }
 
     public static <T> BinaryOperator<T> throwingBinOp() {
-        return (l, r) -> {
-            throw new UnsupportedOperationException();
-        };
+        return (l, r) -> {throw new UnsupportedOperationException();};
     }
 
     static Class<?> getCallerClass(int nFrames) {

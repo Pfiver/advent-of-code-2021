@@ -1,7 +1,7 @@
 package day08;
 
-import java.util.Arrays;
-import java.util.BitSet;
+import common.Test;
+
 import java.util.stream.IntStream;
 
 import static common.IO.getInput;
@@ -56,14 +56,14 @@ public class Solve2Test {
     }
 
     private static long factorial(int num) {
-        return IntStream.range(1, num+1).reduce((s, n) -> s * n).orElseThrow();
+        return IntStream.range(1, num + 1).reduce((s, n) -> s * n).orElseThrow();
     }
 
     private static void test1() {
         var display = new Solve2.Display("cdfeb fcadb cdfeb cdbaf");
 
         Solve2.Wiring w = new Solve2.Wiring();
-        w.mapping = new int[] {
+        w.mapping = new int[]{
                 //// 0, 1, 2, 3, 4, 5, 6
                 /**/ 2, 5, 6, 0, 1, 3, 4
         };
@@ -73,9 +73,7 @@ public class Solve2Test {
 //        Arrays.stream(display.digits).forEach(Solve2.Display.SevenSeg::show);
 //        Arrays.stream(display.digits).map(Solve2.Display.SevenSeg::display).forEach(v -> System.out.println("v: " + v));
 
-        if (display.display() != 5353) {
-            throw new AssertionError("fail");
-        }
+        Test.assertEquals(5353, display.display());
     }
 
     private static void test2() {
@@ -88,9 +86,7 @@ public class Solve2Test {
 //                .peek(r -> System.out.println(" => " + r.output.display()))
                 .mapToInt(r -> r.output.display()).sum();
 
-        if (actual != 61229) {
-            throw new AssertionError("fail");
-        }
+        Test.assertEquals(61229, actual);
     }
 
     private static void test3() {
@@ -101,8 +97,6 @@ public class Solve2Test {
 //        r.output.digits[3].show();
         var actual = r.output.display();
 
-        if (actual != 1197) {
-            throw new AssertionError("fail");
-        }
+        Test.assertEquals(1197, actual);
     }
 }
