@@ -1,6 +1,7 @@
 package day12;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.BaseStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,55 +21,63 @@ public class Solve2 {
     record Graph(Cavern start, Collection<Cavern> caverns) {
         List<Path> findPaths() {
             List<Path> paths = new ArrayList<>();
-            Path p = newPath(start);
-            while (p.extend(paths) || p.backtrack()) {
-                if (p.tip().type == END) {
-                    paths.add(p);
-                    p = newPath(p);
-                }
+            for (Path p = newPath(start); p.advance(); p = newPath(p)) {
+                paths.add(p);
             }
             return paths;
         }
     }
 
-    record Path(Stack<Integer> linkIndices, Stack<Cavern> caverns) {
-        Cavern tip() {
-            return caverns.peek();
-        }
+    record Path(Stack<Integer> indices, Stack<Cavern> caverns, AtomicBoolean joker) {
 
-        boolean extend(Collection<Path> existing) {
-            caverns.push(caverns.peek().links.get(linkIndices.push(0)));
-            do {
-                if (isValid()) {
+        boolean advance() {
+
+            if (tip().type == END) {
+                if (!backtrack()) {
+                    return false;
+                }
+            }
+
+            for (;;) {
+
+                if (!isValid()) {
+                    if (!backtrack()) {
+                        return false;
+                    }
+                }
+
+                if (tip().type == END) {
                     return true;
                 }
-            } while (nextLink());
-            linkIndices.pop();
-            caverns.pop();
-            return false;
+
+                caverns.push(tip().links.get(indices.push(0)));
+            }
         }
 
         boolean backtrack() {
-            for (; linkIndices.size() > 0; linkIndices.pop(), caverns.pop()) {
-                while (nextLink()) {
+
+            for (;;) {
+
+                // leave this, remembering state
+                int i = indices.pop() + 1;
+                caverns.pop();
+
+                // any uncharted cave left ?
+                if (i < tip().links.size()) {
+
+                    // ok - turn towards the next cave
+                    caverns.push(tip().links.get(indices.push(i)));
+
                     if (isValid()) {
+                        // yay - this looks promising
                         return true;
                     }
                 }
+                else if (indices.isEmpty()) {
+                    // back to square one
+                    return false;
+                }
             }
-            return false;
-        }
-
-        boolean nextLink() {
-            Cavern previousCavern = caverns.get(caverns.size() - 2);
-            if (linkIndices.peek() + 1 < previousCavern.links.size()) {
-                var i = linkIndices.pop() + 1;
-                caverns.pop();
-                linkIndices.push(i);
-                caverns.push(previousCavern.links.get(i));
-                return true;
-            }
-            return false;
         }
 
         boolean isValid() {
@@ -85,6 +94,16 @@ public class Solve2 {
                     .collect(groupingBy(c -> c.spec, counting())).values().stream().noneMatch(c -> c > 1);
         }
 
+        boolean _isValid() {
+            return tip().type == UPPER
+                    || !caverns.subList(0, caverns.size() - 1).contains(tip())
+                    || (tip().type == LOWER && !joker.getAndSet(true));
+        }
+
+        Cavern tip() {
+            return caverns.peek();
+        }
+
         public String toString() {
             return caverns.stream().map(c -> c.spec).collect(Collectors.joining(","));
         }
@@ -95,12 +114,13 @@ public class Solve2 {
             START, END, UPPER, LOWER;
         }
 
-        public String toString() {
-            return spec;
+        public boolean equals(Object o) {
+            return o instanceof Cavern c
+                    && c.spec.equals(spec);
         }
 
-        public boolean equals(Object o) {
-            return o instanceof Cavern c && c.spec.equals(spec);
+        public String toString() {
+            return spec;
         }
     }
 
@@ -139,17 +159,17 @@ public class Solve2 {
         return LOWER;
     }
 
-    static Path newPath(Path perev) {
+    static Path newPath(Path prev) {
         var linkIndices = new Stack<Integer>();
-        linkIndices.addAll(perev.linkIndices);
+        linkIndices.addAll(prev.indices);
         var caverns = new Stack<Cavern>();
-        caverns.addAll(perev.caverns);
-        return new Path(linkIndices, caverns);
+        caverns.addAll(prev.caverns);
+        return new Path(linkIndices, caverns, new AtomicBoolean());
     }
 
     static Path newPath(Cavern start) {
         var caverns = new Stack<Cavern>();
         caverns.push(start);
-        return new Path(new Stack<>(), caverns);
+        return new Path(new Stack<>(), caverns, new AtomicBoolean());
     }
 }
