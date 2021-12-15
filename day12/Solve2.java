@@ -2,6 +2,7 @@ package day12;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.BaseStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +29,7 @@ public class Solve2 {
         }
     }
 
-    record Path(Stack<Integer> indices, Stack<Cavern> caverns, AtomicBoolean joker) {
+    record Path(Stack<Integer> indices, Stack<Cavern> caverns, AtomicInteger joker) {
 
         boolean advance() {
 
@@ -59,6 +60,7 @@ public class Solve2 {
             for (;;) {
 
                 // leave this, remembering state
+                joker.compareAndSet(indices.size(), 0);
                 int i = indices.pop() + 1;
                 caverns.pop();
 
@@ -81,23 +83,10 @@ public class Solve2 {
         }
 
         boolean isValid() {
-            return tip().type == UPPER || (tip().type == LOWER
-                    ? isLowerValid()
-                    : !caverns.subList(0, caverns.size() - 1).contains(tip()));
-        }
-
-        boolean isLowerValid() {
-            List<Cavern> existing = this.caverns.subList(0, this.caverns.size() - 1);
-            return existing.stream().noneMatch(tip()::equals)
-                    || existing.stream().filter(c -> c.type == LOWER)
-                    // "a _single_ small cave can be visited at most twice"
-                    .collect(groupingBy(c -> c.spec, counting())).values().stream().noneMatch(c -> c > 1);
-        }
-
-        boolean _isValid() {
             return tip().type == UPPER
+                    || joker.get() == indices.size()
                     || !caverns.subList(0, caverns.size() - 1).contains(tip())
-                    || (tip().type == LOWER && !joker.getAndSet(true));
+                    || (tip().type == LOWER && joker.compareAndSet(0, indices.size()));
         }
 
         Cavern tip() {
@@ -164,12 +153,12 @@ public class Solve2 {
         linkIndices.addAll(prev.indices);
         var caverns = new Stack<Cavern>();
         caverns.addAll(prev.caverns);
-        return new Path(linkIndices, caverns, new AtomicBoolean());
+        return new Path(linkIndices, caverns, new AtomicInteger(prev.joker.get()));
     }
 
     static Path newPath(Cavern start) {
         var caverns = new Stack<Cavern>();
         caverns.push(start);
-        return new Path(new Stack<>(), caverns, new AtomicBoolean());
+        return new Path(new Stack<>(), caverns, new AtomicInteger());
     }
 }

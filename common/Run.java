@@ -65,7 +65,7 @@ public class Run {
 
         IO.writeResult(clazz, results.get(0));
 
-//        System.out.printf("\u0008\u0008\u0008%n    (computed in %4d milliseconds)%n%n", System.currentTimeMillis() - start);
-        System.out.printf("\u0008\u0008\u0008: %16d (computed in %4d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
+//        System.out.printf("\u0008\u0008\u0008%n    (computed in %3d milliseconds)%n%n", System.currentTimeMillis() - start);
+        System.out.printf("\u0008\u0008\u0008: %16d (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
     }
 }

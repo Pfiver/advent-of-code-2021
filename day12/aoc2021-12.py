@@ -1,10 +1,11 @@
 from collections import defaultdict
+from time import perf_counter
+c = perf_counter()
 
 paths = defaultdict(list)
 for a, b in [line.split('-') for line in open('input.txt').read().splitlines()]:
     paths[a].append(b)
     paths[b].append(a)
-
 
 def dfs(cave, visited, one_off):
     if cave == 'end':
@@ -25,3 +26,5 @@ def dfs(cave, visited, one_off):
 
 print('Part 1:', dfs('start', set(), ''))
 print('Part 2:', dfs('start', set(), ' '))
+
+print("Elapsed time: %s" % (perf_counter() - c))

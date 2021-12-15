@@ -1,5 +1,7 @@
 from functools import lru_cache
 from collections import defaultdict
+from time import perf_counter
+c = perf_counter()
 
 edges = defaultdict(list)
 for line in open("input.txt").readlines():
@@ -25,3 +27,5 @@ def dfs(current, visited, twice=True):
 
 print("Part 1:", dfs("start", tuple(set())))
 print("Part 2:", dfs("start", tuple(set()), False))
+
+print("Elapsed time: %s" % (perf_counter() - c))
