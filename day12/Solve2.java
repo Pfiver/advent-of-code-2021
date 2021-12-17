@@ -9,12 +9,6 @@ import static day12.Solve2.Cavern.Type.*;
 
 public class Solve2 {
 
-    public static void main(String[] args) {
-        long start = System.currentTimeMillis();
-        System.out.println(solve());
-        System.out.println(System.currentTimeMillis() - start);
-    }
-
     public static long solve() {
         Graph caveSystem = parseGraph(getInput());
         return caveSystem.countPaths();
@@ -22,16 +16,11 @@ public class Solve2 {
 
     record Graph(Cavern start, Collection<Cavern> caverns) {
         long countPaths() {
-            int cnt = 0;
-            var path = new Path(start);
-            while (path.advance()) {
-                cnt++;
-            }
-            return cnt;
+            return new PathFinder(start).countPaths();
         }
     }
 
-    static class Path {
+    static class PathFinder {
 
         Cavern tip;
         int len = 0;
@@ -39,60 +28,37 @@ public class Solve2 {
         int[] indices = new int[1024];
         Cavern[] visited = new Cavern[1024];
 
-        public Path(Cavern start) {
+        public PathFinder(Cavern start) {
             tip = start;
         }
 
-        boolean advance() {
+        long countPaths() {
 
-            if (tip.type == END) {
-                if (!backtrack()) {
-                    return false;
-                }
-            }
+            int i = 0;
+            long cnt = 0;
 
-            for (;;) {
-
-                if (!isValid()) {
-                    if (!backtrack()) {
-                        return false;
+            do {
+                do {
+                    if (tip.type == END) {
+                        cnt += 1;
+                        break;
+                    }
+                    else {
+                        push(i);
+                        i = 0;
                     }
                 }
+                while (tip.type == UPPER || fresh() || joker());
 
-                if (tip.type == END) {
-                    return true;
-                }
-
-                push(0);
-            }
-        }
-
-        boolean backtrack() {
-
-            for (;;) {
-
-                // leave this, remembering state
-                if (joker == len) {
-                    joker = 0;
-                }
-                int i = pop() + 1;
-
-                // any uncharted cave left ?
-                if (i < tip.links.size()) {
-
-                    // ok - turn towards the next cave
-                    push(i);
-
-                    if (isValid()) {
-                        // yay - this looks promising
-                        return true;
+                do {
+                    if (len == 0) {
+                        return cnt;
                     }
+                    i = pop() + 1;
                 }
-                else if (len == 0) {
-                    // back to square one
-                    return false;
-                }
-            }
+                while (i == tip.links.size());
+
+            } while (true);
         }
 
         void push(int i) {
@@ -103,33 +69,29 @@ public class Solve2 {
         }
 
         private int pop() {
+            if (joker == len) {
+                joker = 0;
+            }
             len--;
             tip = visited[len];
             return indices[len];
         }
 
-        boolean isValid() {
-            return tip.type == UPPER
-                    || !visited()
-                    || joker == len
-                    || (tip.type == LOWER && pullJoker());
+        boolean fresh() {
+            for (int i = 0; i < len; i++) {
+                if (tip.equals(visited[i])) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        boolean pullJoker() {
+        boolean joker() {
             if (joker == 0) {
                 joker = len;
                 return true;
             }
-            return false;
-        }
-
-        boolean visited() {
-            for (int i = 0; i < len; i++) {
-                if (tip.equals(visited[i])) {
-                    return true;
-                }
-            }
-            return false;
+            return joker == len;
         }
 
         public String toString() {
@@ -170,10 +132,10 @@ public class Solve2 {
                 .forEach(pair -> {
                     var l = caverns.computeIfAbsent(pair.next(), Solve2::parseCavern);
                     var r = caverns.computeIfAbsent(pair.next(), Solve2::parseCavern);
-                    if (!l.links.contains(r)) {
+                    if (r.type != START && !l.links.contains(r)) {
                         l.links.add(r);
                     }
-                    if (!r.links.contains(l)) {
+                    if (l.type != START && !r.links.contains(l)) {
                         r.links.add(l);
                     }
                 });
