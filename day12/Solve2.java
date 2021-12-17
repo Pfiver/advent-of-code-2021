@@ -1,10 +1,7 @@
 package day12;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.BaseStream;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static common.IO.getInput;
@@ -12,26 +9,43 @@ import static day12.Solve2.Cavern.Type.*;
 
 public class Solve2 {
 
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+        System.out.println(solve());
+        System.out.println(System.currentTimeMillis() - start);
+    }
+
     public static long solve() {
         Graph caveSystem = parseGraph(getInput());
-        return caveSystem.findPaths().size();
+        return caveSystem.countPaths();
     }
 
     record Graph(Cavern start, Collection<Cavern> caverns) {
-        List<Path> findPaths() {
-            List<Path> paths = new ArrayList<>();
-            for (Path p = newPath(start); p.advance(); p = newPath(p)) {
-                paths.add(p);
+        long countPaths() {
+            int cnt = 0;
+            var path = new Path(start);
+            while (path.advance()) {
+                cnt++;
             }
-            return paths;
+            return cnt;
         }
     }
 
-    record Path(Stack<Integer> indices, Stack<Cavern> visited, AtomicReference<Cavern> tip, AtomicInteger joker) {
+    static class Path {
+
+        Cavern tip;
+        int len = 0;
+        int joker = 0;
+        int[] indices = new int[1024];
+        Cavern[] visited = new Cavern[1024];
+
+        public Path(Cavern start) {
+            tip = start;
+        }
 
         boolean advance() {
 
-            if (tip.get().type == END) {
+            if (tip.type == END) {
                 if (!backtrack()) {
                     return false;
                 }
@@ -45,7 +59,7 @@ public class Solve2 {
                     }
                 }
 
-                if (tip.get().type == END) {
+                if (tip.type == END) {
                     return true;
                 }
 
@@ -58,11 +72,13 @@ public class Solve2 {
             for (;;) {
 
                 // leave this, remembering state
-                joker.compareAndSet(indices.size(), 0);
+                if (joker == len) {
+                    joker = 0;
+                }
                 int i = pop() + 1;
 
                 // any uncharted cave left ?
-                if (i < tip.get().links.size()) {
+                if (i < tip.links.size()) {
 
                     // ok - turn towards the next cave
                     push(i);
@@ -72,7 +88,7 @@ public class Solve2 {
                         return true;
                     }
                 }
-                else if (indices.isEmpty()) {
+                else if (len == 0) {
                     // back to square one
                     return false;
                 }
@@ -80,25 +96,49 @@ public class Solve2 {
         }
 
         void push(int i) {
-            indices.push(i);
-            visited.push(tip.get());
-            tip.set(tip.get().links.get(i));
+            indices[len] = i;
+            visited[len] = tip;
+            tip = tip.links.get(i);
+            len++;
         }
 
         private int pop() {
-            tip.set(visited.pop());
-            return indices.pop();
+            len--;
+            tip = visited[len];
+            return indices[len];
         }
 
         boolean isValid() {
-            return tip.get().type == UPPER
-                    || joker.get() == indices.size()
-                    || !visited.contains(tip.get())
-                    || (tip.get().type == LOWER && joker.compareAndSet(0, indices.size()));
+            return tip.type == UPPER
+                    || !visited()
+                    || joker == len
+                    || (tip.type == LOWER && pullJoker());
+        }
+
+        boolean pullJoker() {
+            if (joker == 0) {
+                joker = len;
+                return true;
+            }
+            return false;
+        }
+
+        boolean visited() {
+            for (int i = 0; i < len; i++) {
+                if (tip.equals(visited[i])) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public String toString() {
-            return visited.stream().map(c -> c.spec).collect(Collectors.joining(","));
+            String repr = "";
+            for (int i = 0; i < len; i++) {
+                repr += visited[i].spec + ",";
+            }
+            repr += tip.spec;
+            return repr;
         }
     }
 
@@ -150,19 +190,5 @@ public class Solve2 {
         if (spec.equals("end")) return END;
         if (Character.isUpperCase(spec.charAt(0))) return UPPER;
         return LOWER;
-    }
-
-    static Path newPath(Path prev) {
-        var linkIndices = new Stack<Integer>();
-        linkIndices.addAll(prev.indices);
-        var visited = new Stack<Cavern>();
-        visited.addAll(prev.visited);
-        return new Path(linkIndices, visited, prev.tip, new AtomicInteger(prev.joker.get()));
-    }
-
-    static Path newPath(Cavern start) {
-        var visited = new Stack<Cavern>();
-//        visited.push(start);
-        return new Path(new Stack<>(), visited, new AtomicReference<>(start), new AtomicInteger());
     }
 }

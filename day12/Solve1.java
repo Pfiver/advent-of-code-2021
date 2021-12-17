@@ -35,6 +35,9 @@ public class Solve1 {
         }
 
         boolean extend(Collection<Path> existing) {
+            if (tip().type == END) {
+                return false;
+            }
             caverns.push(caverns.peek().links.get(linkIndices.push(0)));
             do {
                 if (isValid() && isNew(existing)) {

@@ -26,11 +26,8 @@ public class SolveTest {
     }
 
     private static void assertPaths(String expected, Solve2.Graph graph) {
-        var actual = graph.findPaths().stream()
-                .map(Solve2.Path::toString)
-                .sorted()
-                .collect(joining("\n"));
+        var actual = graph.countPaths();
 
-        assertEquals(expected, actual);
+        assertEquals(expected.lines().count(), actual);
     }
 }
