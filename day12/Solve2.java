@@ -1,16 +1,14 @@
 package day12;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.BaseStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static common.IO.getInput;
 import static day12.Solve2.Cavern.Type.*;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 
 public class Solve2 {
 
@@ -29,11 +27,11 @@ public class Solve2 {
         }
     }
 
-    record Path(Stack<Integer> indices, Stack<Cavern> caverns, AtomicInteger joker) {
+    record Path(Stack<Integer> indices, Stack<Cavern> visited, AtomicReference<Cavern> tip, AtomicInteger joker) {
 
         boolean advance() {
 
-            if (tip().type == END) {
+            if (tip.get().type == END) {
                 if (!backtrack()) {
                     return false;
                 }
@@ -47,11 +45,11 @@ public class Solve2 {
                     }
                 }
 
-                if (tip().type == END) {
+                if (tip.get().type == END) {
                     return true;
                 }
 
-                caverns.push(tip().links.get(indices.push(0)));
+                push(0);
             }
         }
 
@@ -61,14 +59,13 @@ public class Solve2 {
 
                 // leave this, remembering state
                 joker.compareAndSet(indices.size(), 0);
-                int i = indices.pop() + 1;
-                caverns.pop();
+                int i = pop() + 1;
 
                 // any uncharted cave left ?
-                if (i < tip().links.size()) {
+                if (i < tip.get().links.size()) {
 
                     // ok - turn towards the next cave
-                    caverns.push(tip().links.get(indices.push(i)));
+                    push(i);
 
                     if (isValid()) {
                         // yay - this looks promising
@@ -82,19 +79,26 @@ public class Solve2 {
             }
         }
 
-        boolean isValid() {
-            return tip().type == UPPER
-                    || joker.get() == indices.size()
-                    || !caverns.subList(0, caverns.size() - 1).contains(tip())
-                    || (tip().type == LOWER && joker.compareAndSet(0, indices.size()));
+        void push(int i) {
+            indices.push(i);
+            visited.push(tip.get());
+            tip.set(tip.get().links.get(i));
         }
 
-        Cavern tip() {
-            return caverns.peek();
+        private int pop() {
+            tip.set(visited.pop());
+            return indices.pop();
+        }
+
+        boolean isValid() {
+            return tip.get().type == UPPER
+                    || joker.get() == indices.size()
+                    || !visited.contains(tip.get())
+                    || (tip.get().type == LOWER && joker.compareAndSet(0, indices.size()));
         }
 
         public String toString() {
-            return caverns.stream().map(c -> c.spec).collect(Collectors.joining(","));
+            return visited.stream().map(c -> c.spec).collect(Collectors.joining(","));
         }
     }
 
@@ -151,14 +155,14 @@ public class Solve2 {
     static Path newPath(Path prev) {
         var linkIndices = new Stack<Integer>();
         linkIndices.addAll(prev.indices);
-        var caverns = new Stack<Cavern>();
-        caverns.addAll(prev.caverns);
-        return new Path(linkIndices, caverns, new AtomicInteger(prev.joker.get()));
+        var visited = new Stack<Cavern>();
+        visited.addAll(prev.visited);
+        return new Path(linkIndices, visited, prev.tip, new AtomicInteger(prev.joker.get()));
     }
 
     static Path newPath(Cavern start) {
-        var caverns = new Stack<Cavern>();
-        caverns.push(start);
-        return new Path(new Stack<>(), caverns, new AtomicInteger());
+        var visited = new Stack<Cavern>();
+//        visited.push(start);
+        return new Path(new Stack<>(), visited, new AtomicReference<>(start), new AtomicInteger());
     }
 }
