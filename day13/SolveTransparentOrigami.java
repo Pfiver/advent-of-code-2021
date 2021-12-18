@@ -1,29 +1,33 @@
 package day13;
 
+import java.util.Collection;
+
+import static common.Common.throwingBinOp;
+import static common.IO.getInput;
 import static java.util.stream.Collectors.toSet;
 
 public class SolveTransparentOrigami {
 
+    record Point(int x, int y) {}
+    interface Fold { Point apply(Point p);}
+
     /**
      * ... fold the paper up (for horizontal y=... lines) or left (for vertical x=... lines) ...
      */
-    public static void main(String[] args) {
+    public Collection<Point> fold(int limit) {
 
-        record Point(int x, int y) {}
-        interface Fold { Point apply(Point p);}
-
-        var points = TEST_INPUT.lines()
+        return getInput()
                 .dropWhile(l1 -> !l1.isEmpty())
                 .skip(1)
-                .limit(1)
+                .limit(limit)
                 .<Fold>map(l1 -> {
                     int i1 = l1.indexOf('=');
                     int d = Integer.parseInt(l1.substring(i1 + 1));
                     return l1.charAt(i1 - 1) == 'x'
-                            ? p -> p.y < d ? p : new Point(p.x, 2 * d - p.y)
-                            : p -> p.x < d ? p : new Point(2 * d - p.x, p.y);
+                            ? p -> p.x <= d ? p : new Point(2 * d - p.x, p.y)
+                            : p -> p.y <= d ? p : new Point(p.x, 2 * d - p.y);
                 })
-                .reduce(TEST_INPUT.lines()
+                .reduce(getInput()
                                 .takeWhile(l -> !l.isEmpty())
                                 .map(l -> {
                                     int i = l.indexOf(',');
@@ -32,50 +36,36 @@ public class SolveTransparentOrigami {
                                             Integer.parseInt(l.substring(i + 1)));
                                 })
                                 .collect(toSet()),
-                        (pts, fld) -> pts.stream().map(fld::apply).collect(toSet()),
-                        (l, r) -> {
-                            throw new UnsupportedOperationException();
-                        }
+                        (pts, fld) -> pts.stream().map(fld::apply).collect(toSet()), throwingBinOp()
                 );
-
-        System.out.println(points.size());
     }
 
-    static String TEST_INPUT = """
-            6,10
-            0,14
-            9,10
-            0,3
-            10,4
-            4,11
-            6,0
-            6,12
-            4,1
-            0,13
-            10,12
-            3,4
-            3,0
-            8,4
-            1,10
-            2,14
-            8,10
-            9,0
-                        
-            fold along y=7
-            fold along x=5
-            """
-            .trim();
+    public long solve2() {
 
-    static int TEST_RESULT = 17;
+        record Point(int x, int y) {}
+        interface Fold { Point apply(Point p);}
 
-    static String TEST_RESULT_REPR = """
-            #####
-            #...#
-            #...#
-            #...#
-            #####
-            .....
-            .....
-            """
-            .trim();
+        return getInput()
+                .dropWhile(l1 -> !l1.isEmpty())
+                .skip(1)
+                .limit(1)
+                .<Fold>map(l1 -> {
+                    int i1 = l1.indexOf('=');
+                    int d = Integer.parseInt(l1.substring(i1 + 1));
+                    return l1.charAt(i1 - 1) == 'x'
+                            ? p -> p.x < d ? p : new Point(2 * d - p.x, p.y)
+                            : p -> p.y < d ? p : new Point(p.x, 2 * d - p.y);
+                })
+                .reduce(getInput()
+                                .takeWhile(l -> !l.isEmpty())
+                                .map(l -> {
+                                    int i = l.indexOf(',');
+                                    return new Point(
+                                            Integer.parseInt(l.substring(0, i)),
+                                            Integer.parseInt(l.substring(i + 1)));
+                                })
+                                .collect(toSet()),
+                        (pts, fld) -> pts.stream().map(fld::apply).collect(toSet()), throwingBinOp()
+                ).size();
+    }
 }

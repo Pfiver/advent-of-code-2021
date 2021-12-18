@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static common.Common.CheckedSupplier.tryCatch;
@@ -35,25 +36,25 @@ public class Run {
                 .map(className -> tryGet(() -> Class.forName(className)))
                 .forEach(clazz -> tryCatch(
                         () -> clazz.getDeclaredMethod("solve"),
-                        solve -> run(clazz, (Common.CheckedLongSupplier) () -> (long) solve.invoke(null)),
+                        solve -> run(clazz, (Common.CheckedSupplier<?>) () -> solve.invoke(null)),
                         () -> clazz.getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[0])));
         System.out.printf("%nTotal running time: %d milliseconds%n", System.currentTimeMillis() - start);
     }
 
-    public static void run(LongSupplier... longSuppliers) {
-        run(Common.getCallerClass(2), longSuppliers);
+    public static void run(Supplier<?>... suppliers) {
+        run(Common.getCallerClass(2), suppliers);
     }
 
-    private static void run(Class<?> clazz, LongSupplier... longSuppliers) {
+    private static void run(Class<?> clazz, Supplier<?>... suppliers) {
 
         System.out.printf("%s***", clazz.getName());
 
         long start = System.currentTimeMillis();
 
-        List<Long> results = Stream.of(longSuppliers)
+        List<?> results = Stream.of(suppliers)
                 .limit(1)
 //                .peek(s -> System.out.printf("\u0008\u0008\u0008%n    %s: ***", getMethod(s)))
-                .map(LongSupplier::getAsLong)
+                .map(Supplier::get)
 //                .peek(x -> System.out.printf("\u0008\u0008\u0008%s ***", x))
                 .distinct()
                 .toList();
@@ -66,6 +67,6 @@ public class Run {
         IO.writeResult(clazz, results.get(0));
 
 //        System.out.printf("\u0008\u0008\u0008%n    (computed in %3d milliseconds)%n%n", System.currentTimeMillis() - start);
-        System.out.printf("\u0008\u0008\u0008: %16d (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
+        System.out.printf("\u0008\u0008\u0008: %-16s (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
     }
 }

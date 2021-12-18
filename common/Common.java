@@ -2,6 +2,7 @@ package common;
 
 import java.util.function.BinaryOperator;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 public class Common {
 
@@ -13,8 +14,11 @@ public class Common {
         }
     }
 
-    interface CheckedSupplier<T> {
+    interface CheckedSupplier<T> extends Supplier<T> {
         T tryGet() throws Exception;
+        default T get() {
+            return tryGet(this);
+        }
         static <T> T tryGet(CheckedSupplier<T> c) {
             try {return c.tryGet();}
             catch (Exception e) {throw new RuntimeException(e);}
@@ -24,14 +28,6 @@ public class Common {
             try { v = s.tryGet(); }
             catch (Exception e) { CheckedRunnable.tryRun(fail); return; }
             pass.tryAccept(v);
-        }
-    }
-
-    interface CheckedLongSupplier extends LongSupplier {
-        long tryGetAsLong() throws Exception;
-        default long getAsLong() {
-            try {return tryGetAsLong();}
-            catch (Exception e) {throw new RuntimeException(e);}
         }
     }
 

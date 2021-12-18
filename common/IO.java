@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.LongSupplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -27,13 +28,13 @@ public class IO {
         }
     }
 
-    public static void writeResult(Class<?> clazz, long result) {
+    public static void writeResult(Class<?> clazz, Object result) {
         writeResult(parseInt(clazz.getPackageName()), parseInt(clazz.getSimpleName()), result);
     }
 
-    static void writeResult(int day, int task, long result) {
+    static void writeResult(int day, int task, Object result) {
         try {
-            Files.writeString(TOP_DIR.resolve("day%02d/output%d.txt".formatted(day, task)), Long.toString(result));
+            Files.writeString(TOP_DIR.resolve("day%02d/output%d.txt".formatted(day, task)), Objects.toString(result));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
