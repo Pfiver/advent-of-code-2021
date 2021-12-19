@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.LongSupplier;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -44,8 +43,9 @@ public class IO {
     static Pattern DIGITS = Pattern.compile("[0-9]+");
 
     private static int parseInt(String name) {
-        return Integer.parseInt(
-                DIGITS.matcher(name).results()
-                        .findFirst().orElseThrow().group());
+        return DIGITS.matcher(name).results().findFirst()
+                .map(MatchResult::group)
+                .map(Integer::parseInt)
+                .orElse(0);
     }
 }

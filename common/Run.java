@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -28,11 +27,10 @@ public class Run {
                         .map(n -> new File(d, n)))
                 .map(File::getPath)
                 .map(p -> p.substring(TOP_DIR.getPath().length() + 1).replaceAll("\\.class$", ""))
-                .filter(p -> p.matches(".*/Solve\\d*"))
                 .sorted()
 //                .limit(2)
                 .map(p -> p.replace("/", "."))
-                .filter(c -> args.length == 0 || c.equals(args[0]))
+                .filter(c -> args.length == 0 ? c.matches(".*\\.Solve\\d*") : c.equals(args[0]))
                 .map(className -> tryGet(() -> Class.forName(className)))
                 .forEach(clazz -> tryCatch(
                         () -> clazz.getDeclaredMethod("solve"),
