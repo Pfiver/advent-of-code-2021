@@ -6,8 +6,11 @@ import java.util.function.Supplier;
 
 public class Common {
 
-    public interface CheckedRunnable {
+    public interface CheckedRunnable extends Runnable {
         void tryRun() throws Exception;
+        default void run() {
+            tryRun(this);
+        }
         static void tryRun(CheckedRunnable r) {
             try {r.tryRun();}
             catch (Exception e) {throw new RuntimeException(e);}
@@ -22,6 +25,10 @@ public class Common {
         static <T> T tryGet(CheckedSupplier<T> c) {
             try {return c.tryGet();}
             catch (Exception e) {throw new RuntimeException(e);}
+        }
+        static <T> T tryCatch(CheckedSupplier<T> s, T fail) {
+            try { return s.tryGet(); }
+            catch (Exception e) { return fail; }
         }
         static <T> void tryCatch(CheckedSupplier<T> s, CheckedConsumer<T> pass, CheckedRunnable fail) {
             T v;

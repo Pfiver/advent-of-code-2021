@@ -17,6 +17,10 @@ public class Run {
 
     public static void main(String[] args) {
 
+        if (args.length == 0) {
+            IO.appendSystemOutToReadme();
+        }
+
         System.out.println();
         long start = System.currentTimeMillis();
         Arrays.stream(Objects.requireNonNull(TOP_DIR.list()))
@@ -45,7 +49,8 @@ public class Run {
 
     private static void run(Class<?> clazz, Supplier<?>... suppliers) {
 
-        System.out.printf("%s***", clazz.getName());
+//        System.out.printf("%s***", clazz.getName());
+        System.out.printf("%s", clazz.getName());
 
         long start = System.currentTimeMillis();
 
@@ -65,6 +70,7 @@ public class Run {
         IO.writeResult(clazz, results.get(0));
 
 //        System.out.printf("\u0008\u0008\u0008%n    (computed in %3d milliseconds)%n%n", System.currentTimeMillis() - start);
-        System.out.printf("\u0008\u0008\u0008: %-16s (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
+//        System.out.printf("\u0008\u0008\u0008: %-16s (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
+        System.out.printf(": %-16s (computed in %3d milliseconds)%n", results.get(0), System.currentTimeMillis() - start);
     }
 }
