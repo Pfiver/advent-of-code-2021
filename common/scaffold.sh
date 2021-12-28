@@ -1,5 +1,6 @@
 #!/bin/zsh
 
+echo "curl https://adventofcode.com/2021 -o website/2021.html"
 echo "curl https://adventofcode.com/2021/day/\[1-25] -o website/day\#1.html"
 
 echo "run("
