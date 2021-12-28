@@ -19,27 +19,14 @@ import static java.util.Arrays.asList;
 
 public class runit {
 
-    static File TOP_DIR = new File(URI.create(runit.class.getProtectionDomain().getCodeSource().getLocation().toString()).resolve("."));
+    static URL SELF = runit.class.getProtectionDomain().getCodeSource().getLocation();
+    static File TOP_DIR = new File(URI.create(SELF.toString()).resolve("."));
     static File TARGET_DIR = new File(TOP_DIR, "target/classes");
-
-    static Stream<File> findSources(File directory) {
-        return Arrays.stream(Objects.requireNonNull(directory.list()))
-                .map(entry -> new File(directory, entry))
-                .flatMap(entry -> {
-                    if (entry.isDirectory()) {
-                        return findSources(entry);
-                    }
-                    else if (entry.getName().endsWith(".java")) {
-                        return Stream.of(entry);
-                    }
-                    return Stream.empty();
-                });
-    }
 
     public static void main(String... args) throws Exception {
 
         File[] changedSources = Stream.of(Objects.requireNonNull(TOP_DIR.list()))
-                .filter(n -> n.matches("common|day.."))
+                .filter(n -> n.matches("common|day\\d+"))
                 .map(n -> new File(TOP_DIR, n))
                 .flatMap(runit::findSources)
                 .filter(runit::hasChanges)
@@ -61,7 +48,21 @@ public class runit {
         cl.loadClass("common.Run").getDeclaredMethod("main", String[].class).invoke(null, (Object) args);
     }
 
-    private static boolean hasChanges(File sourceFile) {
+    static Stream<File> findSources(File directory) {
+        return Arrays.stream(Objects.requireNonNull(directory.list()))
+                .map(entry -> new File(directory, entry))
+                .flatMap(entry -> {
+                    if (entry.isDirectory()) {
+                        return findSources(entry);
+                    }
+                    else if (entry.getName().endsWith(".java")) {
+                        return Stream.of(entry);
+                    }
+                    return Stream.empty();
+                });
+    }
+
+    static boolean hasChanges(File sourceFile) {
         String relPath = sourceFile.getPath().substring(TOP_DIR.getPath().length() + 1);
         File classFile = new File(TARGET_DIR, relPath.replaceAll("\\.java$", ".class"));
 //        System.out.printf("%s: %s%n", sourceFile, sourceFile.lastModified() > classFile.lastModified());
