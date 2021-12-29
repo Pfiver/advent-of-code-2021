@@ -17,7 +17,7 @@ public class Common {
         }
     }
 
-    interface CheckedSupplier<T> extends Supplier<T> {
+    public interface CheckedSupplier<T> extends Supplier<T> {
         T tryGet() throws Exception;
         default T get() {
             return tryGet(this);
@@ -38,7 +38,7 @@ public class Common {
         }
     }
 
-    interface CheckedConsumer<T> {
+    public interface CheckedConsumer<T> {
         void accept(T v) throws Exception;
         default void tryAccept(T v) {
             try { accept(v); }

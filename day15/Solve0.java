@@ -2,20 +2,19 @@ package day15;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static common.IO.getInput;
 
 public class Solve0 {
 
-
-    public static long solve() {
-        return -1
-//                + solve1()
-//                + solve2()
-        ;
+    public static void main(String[] args) {
+        System.out.println(solve1());
+        System.out.println(solve2());
     }
 
     /**
@@ -92,50 +91,56 @@ public class Solve0 {
         nodes[0][0].lowestRisk = 0;
 
         int round = 0;
+        int minRounds = w * h;
+        long ref = System.nanoTime();
         boolean run = true;
         while (run) {
             run = false;
-//            for (int y = 0; y < h; y++)
-//            for (int x = 0; x < w; x++) {
-//                Node n = nodes[y][x];
 
-            for (Optional<Node> next = Optional.of(nodes[0][0]);
-                 next.isPresent();
-                 next = Arrays.stream(nodes).flatMap(Arrays::stream)
-                         .filter(Objects::nonNull)
-                         .filter(n -> !n.visited)
-                         .min(Comparator.comparing(n -> n.lowestRisk))) {
-                Node n = next.get();
+//            NodeIterator ni = iterateNaive(nodes);
+//            NodeIterator ni = iterateSkewed(nodes);
+            NodeIterator ni = iteratePrioQ(nodes);
+            while (ni.hasNext()){
+                Node n = ni.next();
 
                 if (++round % 100 == 0) {
-                    System.out.print("\033[2K\rround " + round);
+                    long ref2 = System.nanoTime();
+                    long avg = (ref2 - ref) / round / 1000;
+                    System.out.printf("\033[2K\rround %6d / min. %6d / avg. %6d µs p. rnd.", round, minRounds, avg);
                 }
 
                 if (n.left != null && n.left.lowestRisk > n.lowestRisk + n.left.risk) {
                     n.left.lowestRisk = n.lowestRisk + n.left.risk;
                     n.left.comingFrom = n;
+                    ni.update(n.left);
                     run = true;
                 }
 
                 if (n.right != null && n.right.lowestRisk > n.lowestRisk + n.right.risk) {
                     n.right.lowestRisk = n.lowestRisk + n.right.risk;
                     n.right.comingFrom = n;
+                    ni.update(n.right);
                     run = true;
                 }
 
                 if (n.top != null && n.top.lowestRisk > n.lowestRisk + n.top.risk) {
                     n.top.lowestRisk = n.lowestRisk + n.top.risk;
                     n.top.comingFrom = n;
+                    ni.update(n.top);
                     run = true;
                 }
 
                 if (n.bottom != null && n.bottom.lowestRisk > n.lowestRisk + n.bottom.risk) {
                     n.bottom.lowestRisk = n.lowestRisk + n.bottom.risk;
                     n.bottom.comingFrom = n;
+                    ni.update(n.bottom);
                     run = true;
                 }
 
                 n.visited = true;
+            }
+            if (ni.hasPriorityQueueSemantics()) {
+                break;
             }
         }
         System.out.println();
@@ -143,10 +148,86 @@ public class Solve0 {
         return nodes[h-1][w-1];
     }
 
-    static class Node {
+    static NodeIterator iterateNaive(Node[][] nodes) {
+        return new DelegatingNodeIterator(Stream.generate(() -> Arrays.stream(nodes).flatMap(Arrays::stream)
+                        .filter(Objects::nonNull)
+                        .filter(n -> !n.visited)
+                        .min(Comparator.comparing(n -> n.lowestRisk)))
+                .takeWhile(Optional::isPresent)
+                .flatMap(Optional::stream)
+                .iterator(), true);
+    }
+    interface NodeIterator extends Iterator<Node> {
+        void update(Node it);
+        boolean hasPriorityQueueSemantics();
+    }
+    static class DelegatingNodeIterator implements NodeIterator {
+        private final Iterator<Node> delegate;
+        private final boolean hasPriorityQueueSemantics;
+        DelegatingNodeIterator(Iterator<Node> delegate, boolean hasPriorityQueueSemantics) {
+            this.delegate = delegate;
+            this.hasPriorityQueueSemantics = hasPriorityQueueSemantics;
+        }
+        public boolean hasNext() { return delegate.hasNext(); }
+        public Node next() { return delegate.next(); }
+        public void update(Node it) {}
+        public boolean hasPriorityQueueSemantics() { return hasPriorityQueueSemantics; }
+    }
+    static NodeIterator iteratePrioQ(Node[][] nodes) {
+        System.out.println("visitted: " + Arrays.stream(nodes).flatMap(Arrays::stream).filter(Node::visited).count());
+        var q = new PriorityQueue<>(Comparator.comparing((Node n) -> n.lowestRisk));
+        q.addAll(Arrays.stream(nodes).flatMap(Arrays::stream).toList());
+        return new NodeIterator() {
+            int nDuplicates;
+            public boolean hasNext() {
+                return q.size() > nDuplicates;
+            }
+            public Node next() {
+                Node next;
+                do {
+                    next = q.poll();
+                    if (next.visited()) {
+                        System.out.println("duped--");
+//                        nDuplicates--;
+//                        continue;
+                    }
+                } while(false);
+//                if (next.visited()) System.out.println("hä 2??");
+                return next;
+            }
+            public void update(Node it) {
+                if (it.visited()) {
+                    System.out.print("\nhä 1?");
+//                    return;
+                }
+                q.siftUp(it);
+//                q.remove(it);
+//                q.add(it);
+//                nDuplicates++;
+            }
+            public boolean hasPriorityQueueSemantics() {
+                return true;
+            }
+        };
+    }
+    static NodeIterator iterateSkewed(Node[][] nodes) {
+        int h = nodes.length;
+        int w = nodes[0].length;
+        return new DelegatingNodeIterator(IntStream.iterate(0, i -> i < w, i -> i + 1).boxed()
+                .flatMap(i -> IntStream.iterate(0, j -> j < h, j -> j + 1).boxed()
+                        .map(j -> nodes[i][j]))
+                .iterator(), false);
+    }
+    interface Visitable {
+        boolean visited();
+    }
+    static class Node implements Visitable {
         boolean visited;
         int risk, lowestRisk = Short.MAX_VALUE;
         Node left, right, top, bottom, comingFrom;
+        public boolean visited() {
+            return visited;
+        }
     }
 
     static String TEST_INPUT = """
